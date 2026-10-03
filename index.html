@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#6A2C55">
+<title>บัตรสมาชิก</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💇</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --brand:#6A2C55;--brand-d:#4A1D3B;--ink:#2A1F27;--muted:#6B5A64;--sub:#5A4852;
+  --line:#E8DCE2;--line2:#F0E6EB;--blush:#F7EFF2;--field:#CDBAC4;
+  --ok:#0B6B36;--ok-bg:#E6F8EE;--err:#A3324A;--err-bg:#FBEAEE;--gold:#7E5210;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:#fff;color:var(--ink);font-family:'Anuphan','Noto Sans Thai',system-ui,sans-serif;-webkit-text-size-adjust:100%}
+body{padding-bottom:env(safe-area-inset-bottom)}
+button,input,select,textarea{font-family:inherit;font-size:16px;color:inherit}
+button{cursor:pointer}
+a{color:var(--brand)}
+:focus-visible{outline:3px solid #B98AA8;outline-offset:2px}
+.wrap{max-width:480px;margin:0 auto;min-height:100vh}
+.view{padding:20px 20px 36px;display:flex;flex-direction:column;gap:18px}
+.top{display:flex;align-items:center;gap:6px;margin:-4px 0 -2px -8px}
+.top h1{margin:0;font-size:20px;font-weight:700;flex:1}
+.back{width:44px;height:44px;border:0;background:transparent;display:flex;align-items:center;justify-content:center;border-radius:12px;color:var(--ink)}
+.muted{color:var(--muted);font-size:13px}
+.label{font-size:14px;font-weight:600;display:block;margin-bottom:6px}
+.card{border:1px solid var(--line);border-radius:16px;padding:16px}
+.soft{background:var(--blush);border-radius:16px;padding:14px 16px}
+.row{display:flex;align-items:center;gap:12px}
+.between{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.btn{min-height:48px;border-radius:12px;border:1px solid var(--field);background:#fff;font-size:15px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 16px;color:var(--ink);text-decoration:none}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:600}
+.btn.big{min-height:52px;font-size:17px;border-radius:14px;width:100%}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.input{min-height:48px;border:1px solid var(--field);border-radius:12px;padding:0 14px;background:#fff;width:100%}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:40px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:14px}
+.chip[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:600}
+.pill{font-size:12px;font-weight:700;letter-spacing:.5px;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.ok-pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--ok);background:var(--ok-bg);padding:3px 10px 3px 8px;border-radius:999px}
+.avatar{width:52px;height:52px;border-radius:50%;background:#EEDFE6;color:var(--brand);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:600;flex-shrink:0;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.55;color:#3E2F38}
+.check input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--brand);flex-shrink:0}
+.warn{background:var(--err-bg);color:var(--err);border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.5}
+.note{background:#FBF1E2;color:#6B4A0E;border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.5}
+
+/* member card */
+.mcard{background:var(--brand);color:#fff;border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:18px}
+.mcard .big{font-size:44px;font-weight:700;line-height:1.15}
+.mcard .foot{display:flex;justify-content:space-between;font-size:13px;padding-top:14px;border-top:1px solid rgba(255,255,255,.28)}
+.mcard .foot b{display:block;font-size:16px;font-weight:600}
+.qr-box{display:flex;flex-direction:column;align-items:center;gap:10px}
+.qr-frame{padding:10px;border:1px solid var(--line2);border-radius:12px;background:#fff;line-height:0}
+.tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:92px;border:1px solid var(--line);border-radius:16px;background:#fff;color:var(--ink);font-size:14px;font-weight:500;text-align:center;padding:8px}
+.tile svg{color:var(--brand)}
+.bars{display:grid;gap:4px}
+.bars i{height:6px;border-radius:999px;background:#E6D6DE}
+.bars i.on{background:var(--brand)}
+.perk-ic{width:44px;height:44px;border-radius:12px;background:var(--blush);color:var(--brand);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* tiers */
+.tier{border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.tier.cur{border:2px solid var(--brand)}
+.tier .band{height:6px}
+.tier .body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:12px}
+.tier .name{font-size:20px;font-weight:700}
+.tier .credit{font-size:28px;font-weight:700;line-height:1.15}
+.bonus{font-size:13px;font-weight:600;color:var(--ok);background:var(--ok-bg);padding:4px 10px;border-radius:999px;white-space:nowrap}
+.perk-line{display:flex;align-items:center;gap:8px;font-size:14px;color:#3E2F38}
+
+/* pay */
+.step{width:26px;height:26px;border-radius:50%;background:var(--brand);color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.drop{border:1.5px dashed var(--field);border-radius:16px;padding:14px;display:flex;align-items:center;gap:14px;cursor:pointer;background:#fff}
+.drop img{width:56px;height:72px;object-fit:cover;border-radius:8px;flex-shrink:0}
+.drop .ph{width:56px;height:72px;border-radius:8px;background:#F4F1F2;color:var(--muted);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* list */
+.ritem{display:flex;gap:14px;align-items:center;padding:14px;border:1px solid var(--line);border-radius:16px}
+.ritem .ic{width:52px;height:52px;border-radius:14px;background:var(--blush);color:var(--brand);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ritem.off .ic{background:#F4F1F2;color:#8A7C84}
+.hitem{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line2);align-items:flex-start}
+.hitem .d{width:44px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:2px}
+.hitem .d b{font-size:18px;line-height:1.1}
+.hitem .r{display:flex;flex-direction:column;align-items:flex-end;gap:2px;white-space:nowrap}
+.month{font-size:14px;font-weight:600;color:var(--sub);padding:16px 0 2px}
+
+/* overlays */
+.sheet-bg{position:fixed;inset:0;background:rgba(42,31,39,.55);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:#fff;width:100%;max-width:480px;border-radius:20px 20px 0 0;padding:20px 20px calc(20px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px}
+.sheet h2{margin:0;font-size:19px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:12px;font-size:14px;z-index:90;max-width:90vw;text-align:center}
+.toast.err{background:var(--err)}
+.loading{position:fixed;inset:0;background:rgba(255,255,255,.7);z-index:80;display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center}
+.spinner{width:36px;height:36px;border-radius:50%;border:4px solid #E6D6DE;border-top-color:var(--brand);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spinner{animation-duration:2.4s}}
+.empty{text-align:center;color:var(--muted);padding:28px 12px;font-size:15px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ REGISTER ============ -->
+  <section class="view" data-view="register" hidden style="padding:0;gap:0">
+    <div style="background:var(--blush);padding:28px 24px 32px;display:flex;flex-direction:column;gap:20px">
+      <div class="row">
+        <div class="logo-mark" style="width:44px;height:44px;border-radius:12px;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700" aria-hidden="true" id="reg-logo">B</div>
+        <div><div style="font-size:16px;font-weight:600" id="reg-shop">ร้านของเรา</div><div class="muted">บัตรสมาชิกออนไลน์</div></div>
+      </div>
+      <div>
+        <h1 style="margin:0;font-size:26px;line-height:1.35">สมัครสมาชิก<br>ด้วยบัญชี LINE</h1>
+        <p style="margin:8px 0 0;font-size:15px;line-height:1.6;color:var(--sub)">สมัครฟรี สะสมแต้มทุกครั้งที่ใช้บริการ และซื้อระดับสมาชิกเพื่อรับเครดิตมากกว่าที่จ่าย พร้อมสิทธิพิเศษ</p>
+      </div>
+    </div>
+    <div style="padding:24px;display:flex;flex-direction:column;gap:20px">
+      <div class="row card" style="padding:14px 16px">
+        <div class="avatar" id="reg-avatar"></div>
+        <div class="stack" style="gap:6px">
+          <div style="font-size:17px;font-weight:600" id="reg-name"></div>
+          <span class="ok-pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>ดึงชื่อและรูปจาก LINE แล้ว</span>
+        </div>
+      </div>
+      <div>
+        <label class="label" for="reg-phone">เบอร์โทรศัพท์ <span style="color:var(--err)">*</span></label>
+        <input class="input" id="reg-phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="08X-XXX-XXXX">
+      </div>
+      <div>
+        <label class="label" for="reg-bday">วันเกิด <span style="font-weight:400;color:var(--muted)">(ไม่บังคับ)</span></label>
+        <input class="input" id="reg-bday" type="date">
+        <p class="muted" style="margin:6px 0 0">กรอกไว้เพื่อรับสิทธิพิเศษวันเกิดจากร้าน</p>
+      </div>
+      <div class="stack">
+        <label class="check"><input type="checkbox" id="reg-pdpa">
+          <span>ยินยอมให้ร้านเก็บและใช้ข้อมูลเพื่อให้บริการสมาชิก <span id="reg-terms"></span> <span style="color:var(--err)">*</span></span></label>
+        <label class="check"><input type="checkbox" id="reg-mkt"><span>รับข่าวสารและโปรโมชันจากร้านทาง LINE</span></label>
+      </div>
+      <div id="reg-err" class="warn" role="alert" hidden></div>
+      <button class="btn primary big" id="reg-submit" disabled>ยืนยันสมัครสมาชิก</button>
+      <p class="muted" style="margin:0;text-align:center">สมัครครั้งเดียว ครั้งต่อไปกดจากเมนูใน LINE ได้ทันที ไม่ต้องล็อกอิน</p>
+    </div>
+  </section>
+
+  <!-- ============ CARD ============ -->
+  <section class="view" data-view="card" hidden>
+    <div>
+      <div class="muted" style="font-size:14px">สวัสดีค่ะ</div>
+      <div style="font-size:22px;font-weight:700" id="c-name"></div>
+    </div>
+    <div class="mcard">
+      <div class="between">
+        <div style="font-size:15px;font-weight:600" id="c-shop"></div>
+        <span id="c-tier"></span>
+      </div>
+      <div>
+        <div style="font-size:13px">เครดิตคงเหลือ</div>
+        <div class="big" id="c-credit">฿0</div>
+        <div style="font-size:13px" id="c-expiry"></div>
+      </div>
+      <div class="foot">
+        <div>แต้มสะสม<b id="c-points">0 แต้ม</b></div>
+        <div style="text-align:right">รหัสสมาชิก<b id="c-id"></b></div>
+      </div>
+    </div>
+    <div id="c-pending" class="note" hidden></div>
+    <div id="c-perks" class="card stack" hidden></div>
+    <div class="card qr-box">
+      <div class="qr-frame"><div id="c-qr"></div></div>
+      <div style="font-size:14px;color:#3E2F38;text-align:center">แสดง QR นี้ให้พนักงานเพื่อชำระด้วยเครดิตหรือสะสมแต้ม</div>
+    </div>
+    <div class="grid3">
+      <button class="tile" data-go="tiers"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M6 11l6-6 6 6"/></svg>ซื้อ/อัปเกรด</button>
+      <button class="tile" data-go="rewards"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v9H5v-9"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>แลกแต้ม</button>
+      <button class="tile" data-go="history"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>ประวัติ</button>
+    </div>
+  </section>
+
+  <!-- ============ TIERS ============ -->
+  <section class="view" data-view="tiers" hidden>
+    <div class="top"><button class="back" data-back aria-label="กลับ"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button><h1>เลือกระดับสมาชิก</h1></div>
+    <p style="margin:0;font-size:14px;line-height:1.6;color:var(--sub)">จ่ายครั้งเดียว ได้เครดิตมากกว่าที่จ่าย ใช้ชำระค่าบริการได้ทุกรายการในร้าน</p>
+    <div id="t-pending" class="note" hidden></div>
+    <div id="t-list" class="stack" style="gap:14px"></div>
+  </section>
+
+  <!-- ============ PAY ============ -->
+  <section class="view" data-view="pay" hidden>
+    <div class="top"><button class="back" data-back aria-label="กลับ"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button><h1>ชำระเงิน</h1></div>
+    <div class="soft stack" style="gap:10px" id="p-summary"></div>
+    <div class="stack">
+      <div class="row" style="gap:10px"><div class="step">1</div><div style="font-size:16px;font-weight:600">สแกนจ่ายผ่านพร้อมเพย์</div></div>
+      <div class="card qr-box" id="p-qr-box">
+        <div class="qr-frame"><div id="p-qr"></div></div>
+        <div style="text-align:center"><div style="font-size:15px;font-weight:600" id="p-acc"></div><div class="muted" id="p-acc2"></div></div>
+        <p class="muted" style="margin:0;text-align:center;font-size:13px;line-height:1.5">ถ้าจ่ายจากแอปธนาคารในมือถือเครื่องนี้ ให้แคปหน้าจอ QR แล้วเลือกรูปจากอัลบั้มในแอปธนาคาร</p>
+      </div>
+      <div class="warn" id="p-no-pp" hidden>ร้านยังไม่ได้ตั้งค่าพร้อมเพย์ กรุณาติดต่อร้านเพื่อขอเลขบัญชี</div>
+    </div>
+    <div class="stack">
+      <div class="row" style="gap:10px"><div class="step">2</div><div style="font-size:16px;font-weight:600">แนบสลิปการโอน</div></div>
+      <label class="drop" for="p-slip">
+        <span id="p-thumb" class="ph"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M5 20h14"/></svg></span>
+        <span style="flex:1"><b style="display:block;font-size:15px" id="p-slip-t">แตะเพื่อเลือกรูปสลิป</b><span class="muted" id="p-slip-s">รูปจากอัลบั้มหรือถ่ายใหม่</span></span>
+      </label>
+      <input id="p-slip" type="file" accept="image/*" hidden>
+    </div>
+    <button class="btn primary big" id="p-submit" disabled>ส่งสลิปให้ร้านตรวจสอบ</button>
+    <p class="muted" style="margin:0;text-align:center;line-height:1.55">เมื่อร้านอนุมัติ เครดิตและสิทธิ์จะเข้าบัญชีทันที และแจ้งให้ทราบทาง LINE</p>
+  </section>
+
+  <!-- ============ REWARDS ============ -->
+  <section class="view" data-view="rewards" hidden>
+    <div class="top"><button class="back" data-back aria-label="กลับ"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button><h1>แลกแต้ม</h1>
+      <span class="pill" style="background:var(--blush);color:var(--brand);font-size:14px;letter-spacing:0" id="r-points"></span></div>
+    <p class="muted" style="margin:0;font-size:14px;line-height:1.55">ของรางวัลที่แลกแล้วจะอยู่ในบัตรสมาชิก แจ้งพนักงานตอนชำระเงินเพื่อใช้สิทธิ์</p>
+    <div id="r-list" class="stack"></div>
+  </section>
+
+  <!-- ============ HISTORY ============ -->
+  <section class="view" data-view="history" hidden>
+    <div class="top"><button class="back" data-back aria-label="กลับ"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button><h1>ประวัติ</h1></div>
+    <div class="grid2">
+      <div class="soft"><div class="muted" style="color:var(--sub)">เครดิตคงเหลือ</div><div style="font-size:22px;font-weight:700" id="h-credit"></div></div>
+      <div class="soft"><div class="muted" style="color:var(--sub)">แต้มสะสม</div><div style="font-size:22px;font-weight:700" id="h-points"></div></div>
+    </div>
+    <div class="chips" id="h-filter">
+      <button class="chip" data-f="ALL" aria-pressed="true">ทั้งหมด</button>
+      <button class="chip" data-f="CREDIT" aria-pressed="false">เครดิต</button>
+      <button class="chip" data-f="POINTS" aria-pressed="false">แต้ม</button>
+    </div>
+    <div id="h-list"></div>
+  </section>
+
+  <!-- ============ ERROR ============ -->
+  <section class="view" data-view="error" hidden style="min-height:80vh;justify-content:center;text-align:center">
+    <h1 style="margin:0;font-size:20px">เปิดบัตรสมาชิกไม่สำเร็จ</h1>
+    <p id="err-msg" style="margin:0;color:var(--sub);line-height:1.6"></p>
+    <button class="btn primary big" id="err-retry">ลองอีกครั้ง</button>
+  </section>
+</div>
+
+<div id="sheet-bg" class="sheet-bg" hidden role="dialog" aria-modal="true"><div class="sheet" id="sheet"></div></div>
+<div id="loading" class="loading"><div class="spinner" role="status" aria-label="กำลังโหลด"></div><div class="muted" id="loading-t">กำลังเปิดบัตรสมาชิก</div></div>
+<div id="toast" class="toast" hidden role="status"></div>
+
+<script>
+// ================================================================
+// CONFIG
+// ================================================================
+const CONFIG = {
+  LIFF_ID: '2011847448-OeSLkUGH',
+  API_URL: 'https://script.google.com/macros/s/AKfycbxl45tVrTbzampsNjhG9y-A-BWnDXWZu5B8mwnqh6_egHsxDlJ9EsHiCHK0ZjpBlIiH/exec'
+};
+
+// ================================================================
+// helpers
+// ================================================================
+const $ = id => document.getElementById(id);
+const fmt = n => Number(n || 0).toLocaleString('th-TH', { maximumFractionDigits: 2 });
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const TIER_STYLE = {
+  BRONZE: ['#8C5A3C', '#FFFFFF'], SILVER: ['#5F6470', '#FFFFFF'],
+  GOLD: ['#F2D98C', '#4A3608'], PLATINUM: ['#34405E', '#FFFFFF']
+};
+const ICON_CHECK = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>';
+const ICON_GIFT = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v9H5v-9"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>';
+const ICON_DROP = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/></svg>';
+
+const S = { me: null, tiers: null, tierInfo: null, selTier: null, slip: null, hist: null, histFilter: 'ALL' };
+
+function loading(on, text) {
+  $('loading').hidden = !on;
+  $('loading-t').textContent = text || '';
+}
+let toastTimer;
+function toast(msg, isErr) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isErr ? ' err' : '');
+  t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.hidden = true; }, isErr ? 4500 : 2800);
+}
+function openSheet(html) { $('sheet').innerHTML = html; $('sheet-bg').hidden = false; }
+function closeSheet() { $('sheet-bg').hidden = true; $('sheet').innerHTML = ''; }
+$('sheet-bg').addEventListener('click', e => { if (e.target.id === 'sheet-bg') closeSheet(); });
+function confirmSheet(title, body, okText) {
+  return new Promise(res => {
+    openSheet(`<h2>${esc(title)}</h2>${body}<div class="grid2">
+      <button class="btn big" id="cf-no">ยกเลิก</button><button class="btn primary big" id="cf-ok">${esc(okText)}</button></div>`);
+    $('cf-no').onclick = () => { closeSheet(); res(false); };
+    $('cf-ok').onclick = () => { closeSheet(); res(true); };
+  });
+}
+function tierPill(code, name) {
+  const st = TIER_STYLE[code] || ['#FFFFFF', '#6A2C55'];
+  return `<span class="pill" style="background:${st[0]};color:${st[1]}">${esc(name || code)}</span>`;
+}
+function avatar(el, name, pic) {
+  el.innerHTML = pic ? `<img src="${esc(pic)}" alt="">` : esc(String(name || '?').trim().charAt(0));
+}
+function daysText(d) { d = Number(d) || 0; return d >= 28 ? Math.round(d / 30.42) + ' เดือน' : d + ' วัน'; }
+
+// ================================================================
+// API
+// ================================================================
+async function api(action, data) {
+  let res;
+  try {
+    res = await fetch(CONFIG.API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(Object.assign({ action: action, idToken: liff.getIDToken() }, data || {}))
+    });
+  } catch (e) { throw new Error('เชื่อมต่ออินเทอร์เน็ตไม่ได้ ลองใหม่อีกครั้ง'); }
+  if (!res.ok) throw new Error('ระบบไม่ตอบสนอง ลองใหม่อีกครั้ง');
+  const j = await res.json();
+  if (!j.ok) throw new Error(j.error || 'เกิดข้อผิดพลาด');
+  return j.data;
+}
+
+function showError(msg) {
+  loading(false);
+  $('err-msg').textContent = msg;
+  show('error', false);
+}
+$('err-retry').onclick = () => {
+  if (window.liff && liff.isLoggedIn && liff.isLoggedIn() && !liff.isInClient()) {
+    liff.logout();
+    liff.login({ redirectUri: location.href });
+  } else {
+    location.reload();
+  }
+};
+
+// ================================================================
+// navigation
+// ================================================================
+function show(view, push) {
+  document.querySelectorAll('[data-view]').forEach(s => { s.hidden = s.dataset.view !== view; });
+  if (push === true) history.pushState({ view: view }, '');
+  else if (push === 'replace') history.replaceState({ view: view }, '');
+  window.scrollTo(0, 0);
+}
+async function openView(view, push) {
+  try {
+    if (view === 'card') { renderCard(); show('card', push); refreshMe(); return; }
+    if (view === 'tiers') { await loadTiers(); show('tiers', push); return; }
+    if (view === 'pay') { renderPay(); show('pay', push); return; }
+    if (view === 'rewards') { await loadRewards(); show('rewards', push); return; }
+    if (view === 'history') { await loadHistory(); show('history', push); return; }
+  } catch (e) { loading(false); toast(e.message, true); }
+}
+window.addEventListener('popstate', e => {
+  const v = (e.state && e.state.view) || 'card';
+  if (!S.me || !S.me.registered) return;
+  openView(v === 'pay' && !S.selTier ? 'tiers' : v, false);
+});
+document.addEventListener('click', e => {
+  const g = e.target.closest('[data-go]');
+  if (g) openView(g.dataset.go, true);
+  if (e.target.closest('[data-back]')) history.length > 1 ? history.back() : openView('card', 'replace');
+});
+
+// ================================================================
+// start
+// ================================================================
+(async function init() {
+  try {
+    await liff.init({ liffId: CONFIG.LIFF_ID });
+  } catch (e) {
+    return showError('เปิดผ่าน LINE ไม่สำเร็จ กรุณาเปิดจากเมนูของร้านใน LINE อีกครั้ง');
+  }
+  if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
+  try {
+    S.me = await api('getMe');
+  } catch (e) { return showError(e.message); }
+  loading(false);
+  if (!S.me.registered) {
+    renderRegister();
+    show('register', 'replace');
+    return;
+  }
+  const page = new URLSearchParams(location.search).get('page');
+  const start = ['tiers', 'rewards', 'history'].indexOf(page) >= 0 ? page : 'card';
+  history.replaceState({ view: 'card' }, '');
+  if (start === 'card') openView('card', false);
+  else { renderCard(); openView(start, true); }
+})();
+
+async function refreshMe() {
+  try {
+    const me = await api('getMe');
+    if (me.registered) { S.me = me; renderCard(); }
+  } catch (e) {}
+}
+
+// ================================================================
+// register
+// ================================================================
+function renderRegister() {
+  const p = S.me.profile || {};
+  $('reg-shop').textContent = S.me.shopName || 'ร้านของเรา';
+  $('reg-logo').textContent = String(S.me.shopName || 'B').trim().charAt(0);
+  $('reg-name').textContent = p.name || '';
+  avatar($('reg-avatar'), p.name, p.picture);
+  $('reg-terms').innerHTML = S.me.termsUrl
+    ? `ตาม <a href="${esc(S.me.termsUrl)}" target="_blank" rel="noopener">นโยบายความเป็นส่วนตัว</a>` : '';
+  validateReg();
+}
+function normPhone(v) { return String(v || '').replace(/\D/g, ''); }
+function validateReg() {
+  $('reg-submit').disabled = !(/^0\d{8,9}$/.test(normPhone($('reg-phone').value)) && $('reg-pdpa').checked);
+}
+['reg-phone', 'reg-pdpa'].forEach(id => $(id).addEventListener('input', validateReg));
+$('reg-pdpa').addEventListener('change', validateReg);
+
+$('reg-submit').onclick = async () => {
+  $('reg-err').hidden = true;
+  $('reg-submit').disabled = true;
+  loading(true, 'กำลังสมัครสมาชิก');
+  try {
+    const r = await api('register', {
+      phone: normPhone($('reg-phone').value),
+      birthday: $('reg-bday').value || '',
+      pdpa: $('reg-pdpa').checked,
+      marketing: $('reg-mkt').checked
+    });
+    S.me = { registered: true, shopName: S.me.shopName, member: r.member };
+    loading(false);
+    toast('สมัครสมาชิกเรียบร้อย');
+    renderCard();
+    show('card', 'replace');
+  } catch (e) {
+    loading(false);
+    $('reg-err').textContent = e.message;
+    $('reg-err').hidden = false;
+    validateReg();
+  }
+};
+
+// ================================================================
+// card
+// ================================================================
+let lastQr = '';
+function renderCard() {
+  const m = S.me.member;
+  $('c-name').textContent = 'คุณ' + (m.name || '');
+  $('c-shop').textContent = S.me.shopName || '';
+  $('c-tier').innerHTML = m.tierCode ? tierPill(m.tierCode, m.tierName.toUpperCase() + ' MEMBER')
+    : '<span class="pill" style="background:rgba(255,255,255,.18);color:#fff">สมาชิกทั่วไป</span>';
+  $('c-credit').textContent = '฿' + fmt(m.credit);
+  $('c-expiry').textContent = m.credit > 0 && m.creditNextExpiry ? 'เครดิตชุดแรกหมดอายุ ' + m.creditNextExpiry
+    : m.tierCode ? '' : 'ซื้อระดับสมาชิกเพื่อรับเครดิตเพิ่ม';
+  $('c-points').textContent = fmt(m.points) + ' แต้ม';
+  $('c-id').textContent = m.memberId;
+
+  $('c-pending').hidden = !m.pendingPurchase;
+  if (m.pendingPurchase) $('c-pending').textContent =
+    'สลิปซื้อระดับ ' + m.pendingPurchase.tierName + ' (฿' + fmt(m.pendingPurchase.amount) + ') รอร้านตรวจสอบ';
+
+  $('c-perks').hidden = !m.perks.length;
+  $('c-perks').innerHTML = '<div style="font-size:15px;font-weight:600">สิทธิพิเศษของคุณ</div>' + m.perks.map(p => {
+    const n = Math.min(p.qty, 12);
+    const on = Math.min(p.remaining, n);
+    const bars = n > 1 ? `<div class="bars" style="grid-template-columns:repeat(${n},minmax(0,1fr))">${
+      Array.from({ length: n }, (_, i) => `<i class="${i >= n - on ? 'on' : ''}"></i>`).join('')}</div>` : '';
+    return `<div class="row"><div class="perk-ic">${p.source === 'REWARD' ? ICON_GIFT : ICON_DROP}</div>
+      <div class="stack" style="gap:6px;flex:1;min-width:0">
+        <div class="between" style="font-size:14px"><b>${esc(p.name)}</b><span>เหลือ <b>${p.remaining}</b>${p.qty > 1 ? ' จาก ' + p.qty : ''} ครั้ง</span></div>
+        ${bars}<div class="muted" style="font-size:12px">ใช้ได้ถึง ${esc(p.expiresAt)}</div></div></div>`;
+  }).join('');
+
+  if (lastQr !== m.memberId && window.QRCode) {
+    $('c-qr').innerHTML = '';
+    new QRCode($('c-qr'), { text: m.memberId, width: 168, height: 168, colorDark: '#2A1F27', colorLight: '#FFFFFF',
+      correctLevel: QRCode.CorrectLevel.M });
+    lastQr = m.memberId;
+  }
+}
+
+// ================================================================
+// tiers
+// ================================================================
+async function loadTiers() {
+  if (!S.tierInfo) {
+    loading(true, 'กำลังโหลดระดับสมาชิก');
+    try { S.tierInfo = await api('getTiers'); } finally { loading(false); }
+  }
+  const m = S.me.member;
+  const pend = m.pendingPurchase;
+  $('t-pending').hidden = !pend;
+  if (pend) $('t-pending').textContent = 'มีสลิปซื้อ ' + pend.tierName + ' รอร้านตรวจสอบอยู่ ซื้อเพิ่มได้หลังร้านตรวจเสร็จ';
+  $('t-list').innerHTML = S.tierInfo.tiers.map(t => {
+    const st = TIER_STYLE[t.code] || ['#6A2C55', '#FFFFFF'];
+    const color = t.code === 'GOLD' ? '#86640F' : st[0];
+    const cur = m.tierCode === t.code;
+    const perks = t.perks.map(p => `<div class="perk-line"><span style="color:${color};display:flex">${ICON_CHECK}</span>${esc(p.name)} ${p.qty} ครั้ง</div>`).join('');
+    return `<div class="tier ${cur ? 'cur' : ''}"><div class="band" style="background:${color}"></div>
+      <div class="body">
+        <div class="between"><div class="name" style="color:${color}">${esc(t.name)}</div>
+          ${cur ? '<span class="pill" style="background:var(--blush);color:var(--brand);letter-spacing:0">ระดับปัจจุบัน</span>' : ''}</div>
+        <div class="between" style="align-items:flex-end">
+          <div><div class="muted">จ่าย ฿${fmt(t.price)} ได้เครดิต</div><div class="credit">฿${fmt(t.credit)}</div></div>
+          ${t.bonus > 0 ? `<span class="bonus">โบนัส +฿${fmt(t.bonus)}</span>` : ''}</div>
+        <div class="stack" style="gap:6px">${perks}
+          <div class="perk-line"><span style="color:${color};display:flex">${ICON_CHECK}</span>สะสมแต้มทุกการใช้บริการ</div>
+          <div class="muted" style="padding-top:2px">เครดิตและสิทธิ์ใช้ได้ ${daysText(t.validDays)}</div></div>
+        <button class="btn primary" data-tier="${esc(t.code)}" ${pend ? 'disabled' : ''}>เลือก ${esc(t.name)}</button>
+      </div></div>`;
+  }).join('') || '<div class="empty">ร้านยังไม่เปิดขายระดับสมาชิก</div>';
+}
+$('t-list').addEventListener('click', e => {
+  const b = e.target.closest('[data-tier]');
+  if (!b || b.disabled) return;
+  S.selTier = S.tierInfo.tiers.find(t => t.code === b.dataset.tier);
+  S.slip = null;
+  openView('pay', true);
+});
+
+// ================================================================
+// pay
+// ================================================================
+function renderPay() {
+  const t = S.selTier;
+  if (!t) return;
+  const st = TIER_STYLE[t.code] || ['#6A2C55', '#FFFFFF'];
+  const perks = t.perks.map(p => p.name + ' ' + p.qty + ' ครั้ง').join(', ');
+  $('p-summary').innerHTML = `
+    <div class="between">${tierPill(t.code, t.name.toUpperCase())}<span class="muted" style="color:var(--sub)">ใช้ได้ ${daysText(t.validDays)}</span></div>
+    <div class="between"><span style="color:var(--sub);font-size:14px">ยอดที่ต้องโอน</span><b style="font-size:22px">฿${fmt(t.price)}</b></div>
+    <div class="between"><span style="color:var(--sub);font-size:14px">เครดิตที่จะได้รับ</span><b style="color:var(--ok)">฿${fmt(t.credit)}</b></div>
+    ${perks ? `<div class="between" style="align-items:flex-start"><span style="color:var(--sub);font-size:14px;flex-shrink:0">สิทธิพิเศษ</span><span style="text-align:right;font-size:14px">${esc(perks)}</span></div>` : ''}`;
+
+  const ppId = String(S.tierInfo.promptpayId || '').replace(/\D/g, '');
+  $('p-qr-box').hidden = !ppId;
+  $('p-no-pp').hidden = !!ppId;
+  if (ppId) {
+    $('p-qr').innerHTML = '';
+    new QRCode($('p-qr'), { text: promptPayPayload(ppId, t.price), width: 200, height: 200,
+      colorDark: '#1F2A3D', colorLight: '#FFFFFF', correctLevel: QRCode.CorrectLevel.M });
+    $('p-acc').textContent = S.tierInfo.accountName || 'บัญชีร้าน';
+    $('p-acc2').textContent = 'พร้อมเพย์ ' + maskPP(ppId) + ' ยอด ฿' + fmt(t.price);
+  }
+  renderSlip();
+}
+function maskPP(id) { return id.length === 10 ? id.slice(0, 3) + '-XXX-' + id.slice(6) : id.slice(0, 4) + 'XXXXX' + id.slice(-4); }
+
+// PromptPay EMVCo payload
+function promptPayPayload(id, amount) {
+  const f = (tag, v) => tag + ('0' + v.length).slice(-2) + v;
+  let target = id;
+  let sub = '01';
+  if (id.length >= 15) sub = '03';
+  else if (id.length >= 13) sub = '02';
+  else target = ('0000000000000' + id.replace(/^0/, '66')).slice(-13);
+  const merchant = f('00', 'A000000677010111') + f(sub, target);
+  let data = f('00', '01') + f('01', amount ? '12' : '11') + f('29', merchant) + f('58', 'TH') + f('53', '764');
+  if (amount) data += f('54', Number(amount).toFixed(2));
+  data += '6304';
+  return data + crc16(data);
+}
+function crc16(s) {
+  let crc = 0xFFFF;
+  for (let i = 0; i < s.length; i++) {
+    crc ^= s.charCodeAt(i) << 8;
+    for (let j = 0; j < 8; j++) crc = (crc & 0x8000) ? ((crc << 1) ^ 0x1021) & 0xFFFF : (crc << 1) & 0xFFFF;
+  }
+  return ('000' + crc.toString(16).toUpperCase()).slice(-4);
+}
+
+$('p-slip').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!f) return;
+  loading(true, 'กำลังเตรียมรูป');
+  try {
+    S.slip = await compressImage(f, 1400, 0.82);
+    renderSlip();
+  } catch (err) { toast('อ่านรูปไม่ได้ ลองเลือกรูปใหม่', true); }
+  finally { loading(false); }
+});
+function renderSlip() {
+  if (S.slip) {
+    $('p-thumb').outerHTML = `<img id="p-thumb" src="${S.slip.dataUrl}" alt="ตัวอย่างสลิป">`;
+    $('p-slip-t').textContent = 'แนบสลิปแล้ว';
+    $('p-slip-s').textContent = 'แตะเพื่อเปลี่ยนรูป';
+  } else {
+    const t = $('p-thumb');
+    if (t.tagName === 'IMG') t.outerHTML = '<span id="p-thumb" class="ph"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M5 20h14"/></svg></span>';
+    $('p-slip-t').textContent = 'แตะเพื่อเลือกรูปสลิป';
+    $('p-slip-s').textContent = 'รูปจากอัลบั้มหรือถ่ายใหม่';
+  }
+  $('p-submit').disabled = !S.slip;
+}
+function compressImage(file, maxSide, quality) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * scale);
+      c.height = Math.round(img.height * scale);
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, c.width, c.height);
+      ctx.drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      const dataUrl = c.toDataURL('image/jpeg', quality);
+      resolve({ dataUrl: dataUrl, base64: dataUrl.split(',')[1] });
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('bad image')); };
+    img.src = url;
+  });
+}
+$('p-submit').onclick = async () => {
+  if (!S.slip || !S.selTier) return;
+  $('p-submit').disabled = true;
+  loading(true, 'กำลังส่งสลิป');
+  try {
+    await api('createPurchase', { tierCode: S.selTier.code, slipBase64: S.slip.base64, slipMime: 'image/jpeg' });
+    S.slip = null;
+    S.selTier = null;
+    const me = await api('getMe');
+    if (me.registered) S.me = me;
+    loading(false);
+    renderCard();
+    show('card', 'replace');
+    openSheet(`<div style="text-align:center" class="stack">
+      <div style="width:64px;height:64px;border-radius:50%;background:var(--ok-bg);color:var(--ok);display:flex;align-items:center;justify-content:center;margin:0 auto">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></div>
+      <h2>ส่งสลิปเรียบร้อย</h2>
+      <p style="margin:0;color:var(--sub);line-height:1.6">ร้านจะตรวจสอบยอดเงิน เมื่ออนุมัติแล้วเครดิตจะเข้าบัตรสมาชิก และมีข้อความแจ้งทาง LINE</p>
+      <button class="btn primary big" id="ok-done">กลับไปที่บัตรสมาชิก</button></div>`);
+    $('ok-done').onclick = closeSheet;
+  } catch (e) {
+    loading(false);
+    toast(e.message, true);
+    $('p-submit').disabled = false;
+  }
+};
+
+// ================================================================
+// rewards
+// ================================================================
+async function loadRewards() {
+  loading(true, 'กำลังโหลดของรางวัล');
+  let r;
+  try { r = await api('getRewards'); } finally { loading(false); }
+  S.rewards = r.rewards;
+  $('r-points').textContent = fmt(r.points) + ' แต้ม';
+  $('r-list').innerHTML = r.rewards.map((w, i) => `
+    <div class="ritem ${w.canRedeem ? '' : 'off'}">
+      <div class="ic">${ICON_GIFT}</div>
+      <div style="flex:1;min-width:0" class="stack" style="gap:3px">
+        <div style="font-size:16px;font-weight:600">${esc(w.name)}</div>
+        ${w.description ? `<div class="muted">${esc(w.description)}</div>` : ''}
+        <div style="font-size:14px;font-weight:600;color:${w.canRedeem ? 'var(--gold)' : 'var(--muted)'}">${fmt(w.cost)} แต้ม${w.canRedeem ? '' : ' · ขาดอีก ' + fmt(w.short)}</div>
+      </div>
+      ${w.canRedeem ? `<button class="btn primary" data-rw="${i}" style="min-height:40px;padding:0 16px">แลก</button>`
+        : '<button class="btn" disabled style="min-height:40px;padding:0 12px;font-size:13px;background:#EFE7EB;border:0">แต้มไม่พอ</button>'}
+    </div>`).join('') || '<div class="empty">ร้านยังไม่มีของรางวัลให้แลก</div>';
+}
+$('r-list').addEventListener('click', async e => {
+  const b = e.target.closest('[data-rw]');
+  if (!b) return;
+  const w = S.rewards[Number(b.dataset.rw)];
+  const ok = await confirmSheet('แลก ' + w.name + '?',
+    `<p style="margin:0;color:var(--sub);line-height:1.6">ใช้ ${fmt(w.cost)} แต้ม สิทธิ์จะอยู่ในบัตรสมาชิก แจ้งพนักงานตอนชำระเงินเพื่อใช้สิทธิ์</p>`, 'แลกเลย');
+  if (!ok) return;
+  loading(true, 'กำลังแลกแต้ม');
+  try {
+    const r = await api('redeemReward', { rewardCode: w.code });
+    S.me.member = r.member;
+    loading(false);
+    toast('แลกเรียบร้อย สิทธิ์อยู่ในบัตรสมาชิกแล้ว');
+    renderCard();
+    await loadRewards();
+  } catch (err) { loading(false); toast(err.message, true); }
+});
+
+// ================================================================
+// history
+// ================================================================
+async function loadHistory() {
+  loading(true, 'กำลังโหลดประวัติ');
+  let r;
+  try { r = await api('getHistory'); } finally { loading(false); }
+  S.hist = r.items;
+  S.me.member = r.summary;
+  $('h-credit').textContent = '฿' + fmt(r.summary.credit);
+  $('h-points').textContent = fmt(r.summary.points) + ' แต้ม';
+  renderHistory();
+}
+$('h-filter').addEventListener('click', e => {
+  const b = e.target.closest('[data-f]');
+  if (!b) return;
+  S.histFilter = b.dataset.f;
+  $('h-filter').querySelectorAll('[data-f]').forEach(x => x.setAttribute('aria-pressed', x === b));
+  renderHistory();
+});
+function renderHistory() {
+  const f = S.histFilter;
+  const items = (S.hist || []).filter(i => f === 'ALL' || (f === 'CREDIT' && i.credit !== 0) || (f === 'POINTS' && i.points !== 0));
+  if (!items.length) { $('h-list').innerHTML = '<div class="empty">ยังไม่มีรายการ</div>'; return; }
+  let month = '';
+  $('h-list').innerHTML = items.map(i => {
+    let head = '';
+    if (i.month !== month) { month = i.month; head = `<div class="month">${esc(month)}</div>`; }
+    const right = [];
+    if (i.credit) right.push(`<b style="font-size:15px;color:${i.credit > 0 ? 'var(--ok)' : '#5E4E58'}">${i.credit > 0 ? '+' : '−'}฿${fmt(Math.abs(i.credit))}</b>`);
+    if (i.points) right.push(`<span style="font-size:13px;font-weight:600;color:${i.points > 0 ? 'var(--brand)' : '#5E4E58'}">${i.points > 0 ? '+' : '−'}${fmt(Math.abs(i.points))} แต้ม</span>`);
+    if (i.kind === 'PURCHASE' && i.status === 'PENDING') right.push('<span class="pill" style="background:#FBF1E2;color:#6B4A0E;letter-spacing:0">รอตรวจ</span>');
+    return head + `<div class="hitem">
+      <div class="d"><b>${esc(i.day)}</b><span class="muted" style="font-size:12px">${esc(i.mon)}</span></div>
+      <div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:600">${esc(i.title)}</div>
+        ${i.sub ? `<div class="muted" style="line-height:1.5">${esc(i.sub)}</div>` : ''}</div>
+      <div class="r">${right.join('')}</div></div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
